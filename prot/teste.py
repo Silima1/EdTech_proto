@@ -6,23 +6,18 @@ import docx
 from PyPDF2 import PdfReader
 from fpdf import FPDF
 import spacy
-from dotenv import load_dotenv
-from langchain.chat_models import ChatOpenAI
 import json
 
-from langchain_openai import ChatOpenAI
+from langchain_openai import ChatOpenAI  # ✅ novo import correto
 
+# ✅ usa secrets para chave API
 llm = ChatOpenAI(
     model="gpt-4",
     temperature=0.2,
     api_key=st.secrets["OPENAI_API_KEY"]
 )
 
-
-load_dotenv()
-openai_api_key = os.getenv("OPENAI_API_KEY")
-
-llm = ChatOpenAI(model="gpt-4", temperature=0.2, openai_api_key=openai_api_key)
+# Carrega modelo SpaCy
 nlp = spacy.load("pt_core_news_sm")
 
 
@@ -43,24 +38,17 @@ def process_document(file):
     temp_filepath = f"./temp_{file.name}"
     with open(temp_filepath, "wb") as temp_file:
         temp_file.write(file.getvalue())
+
     if file.type == "application/pdf":
         reader = PdfReader(temp_filepath)
-        content = (
-            reader.pages[0].extract_text()
-            if len(reader.pages) > 0
-            else "Nenhum conteúdo encontrado"
-        )
-        documents = [{"content": content, "source": file.name}]
-    elif file.type in [
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        "application/msword",
-    ]:
+        content = reader.pages[0].extract_text() if reader.pages else "Nenhum conteúdo encontrado"
+    elif file.type in ["application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/msword"]:
         content = load_docx_first_page(temp_filepath)
-        documents = [{"content": content, "source": file.name}]
     else:
-        documents = None
+        content = "Tipo de arquivo não suportado"
+    
     os.remove(temp_filepath)
-    return documents
+    return [{"content": content, "source": file.name}]
 
 
 def evaluate_sources(documents):
@@ -72,7 +60,7 @@ def evaluate_sources(documents):
         prompt = f"""
 Você é um agente avaliador de trabalhos universitários da área de Engenharia Informática.
 
-Avalie o conteúdo abaixo e responda **apenas** com um objeto JSON no seguinte formato:
+Avalie o conteúdo abaixo e responda APENAS com um objeto JSON no seguinte formato:
 
 {{
   "nota": número entre 0 e 20,
@@ -80,9 +68,7 @@ Avalie o conteúdo abaixo e responda **apenas** com um objeto JSON no seguinte f
 }}
 
 Conteúdo:
-\"\"\"
-{content}
-\"\"\"
+\"\"\"{content}\"\"\"
 """
         try:
             response = llm.predict(prompt)
