@@ -11,3 +11,5 @@ fpdf
 spacy
 langchain
 langchain-community
+langchain-openai
+python-docx
