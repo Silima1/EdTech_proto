@@ -1,0 +1,13 @@
+sanic
+sanic-ext
+orjson
+python-dotenv
+openai
+streamlit
+pandas
+python-docx
+PyPDF2
+fpdf
+spacy
+langchain
+langchain-community
