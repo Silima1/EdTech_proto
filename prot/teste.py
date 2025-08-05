@@ -10,6 +10,15 @@ from dotenv import load_dotenv
 from langchain.chat_models import ChatOpenAI
 import json
 
+from langchain_openai import ChatOpenAI
+
+llm = ChatOpenAI(
+    model="gpt-4",
+    temperature=0.2,
+    api_key=st.secrets["OPENAI_API_KEY"]
+)
+
+
 load_dotenv()
 openai_api_key = os.getenv("OPENAI_API_KEY")
 
@@ -128,8 +137,8 @@ def generate_pdf_report(data, curso, ano, nivel):
 
 
 # Streamlit UI
-st.set_page_config(page_title="Professor Virtual 📚", page_icon="📚", layout="wide")
-st.title("Professor Virtual 📚")
+st.set_page_config(page_title="EdTech 📚", page_icon="📚", layout="wide")
+st.title("EdTech 📚")
 st.sidebar.header("Configurações")
 
 curso = st.sidebar.selectbox("Selecione o Curso", ["Engenharia Informática", "Direito", "Medicina", "Arquitetura"])
